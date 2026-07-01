@@ -1,7 +1,39 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useRef } from 'react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useGSAP } from '@gsap/react';
+
+gsap.registerPlugin(ScrollTrigger);
 
 export default function Values() {
+  const container = useRef(null);
+
+  useGSAP(() => {
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: container.current,
+        start: "top 80%",
+        toggleActions: "play reverse play reverse"
+      }
+    });
+
+    tl.fromTo(".values-title", 
+        { opacity: 0, y: 20, filter: "blur(10px)" },
+        { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.5, ease: "power1.out" }
+      )
+      .fromTo(".value-item", 
+        { opacity: 0, x: -30, filter: "blur(5px)" },
+        { opacity: 1, x: 0, filter: "blur(0px)", stagger: 0.2, duration: 0.5, ease: "power1.out" }, "-=0.2"
+      )
+      .fromTo(".values-img", 
+        { clipPath: "inset(100% 0% 0% 0%)" },
+        { clipPath: "inset(0% 0% 0% 0%)", duration: 1, ease: "power1.inOut" }, 0
+      )
+      .fromTo(".values-img img", 
+        { scale: 1.4 },
+        { scale: 1, duration: 1, ease: "power1.out" }, 0
+      );
+  }, { scope: container });
   const values = [
     {
       title: "Experiência do cliente",
@@ -30,7 +62,7 @@ export default function Values() {
   ];
 
   return (
-    <section className="relative bg-white text-neutral-900 overflow-hidden">
+    <section ref={container} className="relative bg-white text-neutral-900 overflow-hidden">
       
 
 
@@ -39,25 +71,17 @@ export default function Values() {
         {/* Coluna Esquerda: Textos dos Valores */}
         <div className="flex flex-col justify-center px-8 py-20 lg:px-24 lg:py-32">
           
-          <motion.h2 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: false, margin: "-100px" }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
-            className="text-4xl lg:text-5xl font-light tracking-[0.15em] uppercase text-neutral-900 mb-12"
+          <h2 
+            className="values-title text-4xl lg:text-5xl font-light tracking-[0.15em] uppercase text-neutral-900 mb-12"
           >
             VALORES
-          </motion.h2>
+          </h2>
           
           <div className="flex flex-col gap-8">
             {values.map((val, index) => (
-              <motion.div 
+              <div 
                 key={index} 
-                initial={{ opacity: 0, x: -30 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: false, margin: "-50px" }}
-                transition={{ duration: 0.6, delay: index * 0.15, ease: "easeOut" }}
-                className="flex flex-col"
+                className="value-item flex flex-col"
               >
                 <h4 className="text-base lg:text-lg text-neutral-800 font-medium mb-1">
                   <span className="mr-2 text-neutral-400">•</span>
@@ -66,19 +90,15 @@ export default function Values() {
                 <p className="text-neutral-500 font-light text-sm lg:text-base leading-relaxed pl-4">
                   {val.description}
                 </p>
-              </motion.div>
+              </div>
             ))}
           </div>
 
         </div>
 
         {/* Coluna Direita: Imagem Preto e Branco com Máscara Zebra */}
-        <motion.div 
-          initial={{ opacity: 0, x: 50 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: false, margin: "-100px" }}
-          transition={{ duration: 0.8, ease: "easeOut", delay: 0.3 }}
-          className="relative h-[60vh] lg:h-auto w-full overflow-hidden bg-white"
+        <div 
+          className="values-img relative h-[60vh] lg:h-auto w-full overflow-hidden bg-white"
         >
           {/* Imagem de Fundo (nova imagem 3.jpg em Preto e Branco) */}
           <img 
@@ -87,7 +107,7 @@ export default function Values() {
             className="absolute inset-0 w-full h-full object-cover grayscale"
           />
 
-        </motion.div>
+        </div>
 
       </div>
     </section>

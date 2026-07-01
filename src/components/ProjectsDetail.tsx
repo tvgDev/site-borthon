@@ -1,5 +1,9 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useRef } from 'react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useGSAP } from '@gsap/react';
+
+gsap.registerPlugin(ScrollTrigger);
 
 const projects = [
   {
@@ -64,14 +68,50 @@ const projects = [
 ];
 
 export default function ProjectsDetail() {
+  const container = useRef(null);
+
   // Dividir os projetos em pares (chunks de 2)
   const chunks = [];
   for (let i = 0; i < projects.length; i += 2) {
     chunks.push(projects.slice(i, i + 2));
   }
 
+  useGSAP(() => {
+    const projContainers = gsap.utils.toArray(".proj-container");
+
+    projContainers.forEach((el: any) => {
+      const text = el.querySelector(".proj-text");
+      const imgWrapper = el.querySelector(".proj-img");
+      const img = el.querySelector(".proj-img img");
+      const isEven = text.classList.contains("proj-even");
+
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: el,
+          start: "top 80%",
+          toggleActions: "play reverse play reverse"
+        }
+      });
+
+      // Texto: Fade + Blur + Y
+      tl.fromTo(text, 
+        { opacity: 0, y: 50, filter: "blur(10px)" },
+        { opacity: 1, y: 0, filter: "blur(0px)", duration: 1, ease: "power1.out" }, 0
+      )
+      // Imagem: Reveal Lateral + Zoom out
+      .fromTo(imgWrapper, 
+        { clipPath: isEven ? "inset(0% 0% 0% 100%)" : "inset(0% 100% 0% 0%)" },
+        { clipPath: "inset(0% 0% 0% 0%)", duration: 1, ease: "power1.inOut" }, 0.2
+      )
+      .fromTo(img, 
+        { scale: 1.4 },
+        { scale: 1, duration: 1, ease: "power1.out" }, 0.2
+      );
+    });
+  }, { scope: container });
+
   return (
-    <>
+    <div ref={container}>
       {chunks.map((pair, chunkIndex) => {
         // Intercalar: Preto (0), Branco (1), Preto (2)
         const isDark = chunkIndex % 2 === 0;
@@ -105,16 +145,12 @@ export default function ProjectsDetail() {
                 return (
                   <div 
                     key={globalIndex} 
-                    className={`flex flex-col lg:flex-row items-center gap-8 lg:gap-16 w-full ${isEven ? '' : 'lg:flex-row-reverse'}`}
+                    className={`proj-container flex flex-col lg:flex-row items-center gap-8 lg:gap-16 w-full ${isEven ? '' : 'lg:flex-row-reverse'}`}
                   >
                     
                     {/* Bloco de Texto */}
-                    <motion.div 
-                      initial={{ opacity: 0, x: isEven ? -50 : 50 }}
-                      whileInView={{ opacity: 1, x: 0 }}
-                      viewport={{ once: false, margin: "-100px" }}
-                      transition={{ duration: 0.8, ease: "easeOut" }}
-                      className={`w-full lg:w-1/3 flex flex-col justify-center ${isEven ? 'text-left lg:text-right' : 'text-left'} order-2 lg:order-none`}
+                    <div 
+                      className={`proj-text ${isEven ? 'proj-even' : 'proj-odd'} w-full lg:w-1/3 flex flex-col justify-center ${isEven ? 'text-left lg:text-right' : 'text-left'} order-2 lg:order-none`}
                     >
                       <h3 className={`text-2xl font-medium tracking-wider uppercase mb-4 ${textColor}`}>
                         {project.title}
@@ -127,22 +163,18 @@ export default function ProjectsDetail() {
                           </p>
                         ))}
                       </div>
-                    </motion.div>
+                    </div>
 
                     {/* Imagem (Colagem) */}
-                    <motion.div 
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      whileInView={{ opacity: 1, scale: 1 }}
-                      viewport={{ once: false, margin: "-100px" }}
-                      transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
-                      className={`w-full lg:w-2/3 order-1 lg:order-none rounded-[3rem] overflow-hidden shadow-2xl border ${borderColor} ${imgBg} h-[300px] lg:h-[380px]`}
+                    <div 
+                      className={`proj-img w-full lg:w-2/3 order-1 lg:order-none rounded-[3rem] overflow-hidden shadow-2xl border ${borderColor} ${imgBg} h-[300px] lg:h-[380px]`}
                     >
                       <img 
                         src={project.image} 
                         alt={project.title} 
                         className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
                       />
-                    </motion.div>
+                    </div>
 
                   </div>
                 );
@@ -152,6 +184,6 @@ export default function ProjectsDetail() {
           </section>
         );
       })}
-    </>
+    </div>
   );
 }

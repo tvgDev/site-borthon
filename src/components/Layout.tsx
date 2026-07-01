@@ -1,5 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useGSAP } from '@gsap/react';
+
+gsap.registerPlugin(ScrollTrigger);
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -7,6 +12,26 @@ interface LayoutProps {
 
 export default function Layout({ children }: LayoutProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const footerRef = useRef(null);
+
+  useGSAP(() => {
+    gsap.fromTo(".footer-item", 
+      { opacity: 0, y: 30, filter: "blur(10px)" },
+      { 
+        opacity: 1, 
+        y: 0, 
+        filter: "blur(0px)", 
+        duration: 0.8, 
+        stagger: 0.2, 
+        ease: "power1.out",
+        scrollTrigger: {
+          trigger: footerRef.current,
+          start: "top 90%",
+          toggleActions: "play reverse play reverse"
+        }
+      }
+    );
+  }, { scope: footerRef });
 
   return (
     <div className="min-h-screen flex flex-col bg-[#0B0B0B] text-white font-['Montserrat']">
@@ -108,12 +133,9 @@ export default function Layout({ children }: LayoutProps) {
       </main>
 
       {/* FOOTER MINIMALISTA (TEMA CLARO) */}
-      <motion.footer 
+      <footer 
         id="footer"
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        viewport={{ once: false }}
-        transition={{ duration: 1.2, ease: "easeOut" }}
+        ref={footerRef}
         className="relative bg-[#F9F9F9] py-16 border-t-[6px] border-[#1a1a1a] overflow-hidden"
       >
         
@@ -126,14 +148,14 @@ export default function Layout({ children }: LayoutProps) {
         <div className="relative z-10 w-full max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center px-8 lg:px-16">
           
           {/* Esquerda: Logo */}
-          <div className="flex items-center gap-3 lg:gap-8 mb-8 md:mb-0">
+          <div className="footer-item flex items-center gap-3 lg:gap-8 mb-8 md:mb-0">
             <img src="/assets/brand/logo_borthon.png" alt="Borthon Logo" className="w-20 h-20 lg:w-24 lg:h-24 object-contain invert" />
             <img src="/assets/brand/header_logo.png" alt="BORTHON" className="h-10 lg:h-12 object-contain invert" />
           </div>
 
           {/* Direita: Redes Sociais e @BORTHONENG */}
           <div className="flex flex-col lg:flex-row items-center gap-6 lg:gap-6 mt-8 md:mt-0">
-            <div className="flex gap-4 text-black justify-center">
+            <div className="footer-item flex gap-4 text-black justify-center">
               {/* X (Twitter) */}
               <a href="#" className="hover:text-neutral-600 transition-colors">
                 <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.004 3.916H5.078z"/></svg>
@@ -151,10 +173,10 @@ export default function Layout({ children }: LayoutProps) {
                 <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.01.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93v7.2c0 1.63-.52 3.25-1.5 4.54-1.01 1.34-2.5 2.22-4.14 2.51-1.74.31-3.57-.02-5.04-1.02-1.45-1-2.43-2.58-2.65-4.3-.23-1.79.25-3.64 1.37-5.02 1.11-1.37 2.74-2.23 4.51-2.43v4.06c-.85.12-1.7.6-2.22 1.25-.51.64-.7 1.5-.54 2.3.17.84.73 1.55 1.48 1.9.77.37 1.72.37 2.47-.04.75-.42 1.24-1.18 1.32-2.04V.02h.85z"/></svg>
               </a>
             </div>
-            <span className="text-xl lg:text-3xl font-normal uppercase tracking-widest text-black lg:ml-2">@BORTHONENG</span>
+            <span className="footer-item text-xl lg:text-3xl font-normal uppercase tracking-widest text-black lg:ml-2">@BORTHONENG</span>
           </div>
         </div>
-      </motion.footer>
+      </footer>
 
     </div>
   );
